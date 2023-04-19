@@ -1,30 +1,32 @@
 import requests
-import random
 from bs4 import BeautifulSoup
-#import webbrowser
 import shutil
 import time
 import os
 
 link = "https://worldcosplay.net/photo/"
 path = "/Users/peterfile/miniprograms/photos"
-num = 14000
-#max = 7040000
-sleep_time = 240
+with open('place.txt','r') as place:
+    num = int(place.read())
 
-random.seed
+round = 100            #number of download rounds per program run
+set = 100               #number of download atempts per round
 
-for i in range(0, 50):
+timer = time.time()
+sleep_time = 10
 
-    for x in range(0, 100):
+for i in range(0, round):
+
+    for j in range(0, set):
         try:
-            sauce = link + str(num + x)
+            sauce = link + str(num + j)
             r = requests.get(sauce)
-        except ConnectionError:
+        except Exception as e:
             print("cannot work " + sauce)
+            print(f"Exception occured: {e}")
+            print("\a")
             r.close()
-            time.sleep(120)
-            continue
+            exit()
 
         if r.status_code == 200:
 
@@ -33,17 +35,22 @@ for i in range(0, 50):
             pics = soup.find(property="og:image")
             if pics == None:
                 continue
-            picsurl = pics["content"].split('/')[-1]
+            pics_name = pics["content"].split('/')[-1]
             res = requests.get(pics["content"], stream = True)
 
-            with open(os.path.join(path, picsurl), 'wb') as f:
+            with open(os.path.join(path, pics_name), 'wb') as f:
                 shutil.copyfileobj(res.raw, f)
-                print(" Downloading: " + sauce + ' ' + picsurl)
+                print(" Downloading: " + sauce + ' ' + pics_name)
+            res.close()
+        r.close()
 
-                #webbrowser.open_new_tab(pics)
-    num += 100
-    print("Waiting")
-    r.close()
-    res.close()
+    num += set
+    with open('place.txt', 'w') as place:
+        place.write(str(num))
+
+    print("Finished round: " + str(i+1))
     time.sleep(sleep_time)
-print("time to pop champain bitch")
+
+print("time to pop champain!")
+print("Time elapsed: " + "%.2f" % ((time.time() - timer)/60) + " Minutes")
+print("\a")
