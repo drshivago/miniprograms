@@ -15,16 +15,12 @@ def timeDecorator(time_date):
     temp_time = temp_time - minutes
     temp_time = temp_time / 60
 
-    hours = temp_time % 60
+    hours = temp_time % 24
     temp_time = temp_time - hours
     days = temp_time / 24
 
-    print(seconds)
-    print(minutes)
-    print(hours)
-    print(days)
-    print(temp_time)
+    return (days, hours, minutes, seconds)
 
-time_date = 172800
+time_date = 1727700
 
-timeDecorator(time_date)
+print(timeDecorator(time_date))
