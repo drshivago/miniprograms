@@ -4,12 +4,31 @@ import shutil
 import time
 import os
 
+def timeDecorator(time_date):               #all just to format time elapsed
+
+    if time_date < 60:
+        return (0, 0, 0, time_date)
+
+    seconds = time_date % 60
+    temp_time = time_date - seconds
+    temp_time = temp_time / 60
+
+    minutes = temp_time % 60
+    temp_time = temp_time - minutes
+    temp_time = temp_time / 60
+
+    hours = temp_time % 24
+    temp_time = temp_time - hours
+    days = temp_time / 24
+
+    return (days, hours, minutes, seconds)
+
 link = "https://worldcosplay.net/photo/"
 path = "/Users/peterfile/miniprograms/photos"
 with open('place.txt','r') as place:
     num = int(place.read())
 
-round = 100            #number of download rounds per program run
+round = 400             #number of download rounds per program run
 set = 100               #number of download atempts per round
 
 timer = time.time()
@@ -28,7 +47,7 @@ for i in range(0, round):
             r.close()
             exit()
 
-        if r.status_code == 200:
+        if r.status_code == 200:                                    #if page exists
 
             soup = BeautifulSoup(r.content, features="html.parser")
 
@@ -45,12 +64,13 @@ for i in range(0, round):
         r.close()
 
     num += set
-    with open('place.txt', 'w') as place:
+    with open('place.txt', 'w') as place:                          #save progress
         place.write(str(num))
 
-    print("Finished round: " + str(i+1))
+    print("Finished round: ", i+1)
     time.sleep(sleep_time)
 
-print("time to pop champain!")
-print("Time elapsed: " + "%.2f" % ((time.time() - timer)/60) + " Minutes")
+print("time to pop champain!")                                      #some how finised without error
+time_elaps = timeDecorator(time.time() - timer)
+print("Time elapsed: days, hours, minutes, seconds ", time_elaps)
 print("\a")
