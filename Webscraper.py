@@ -28,9 +28,9 @@ path = "/Users/peterfile/miniprograms/photos"
 with open('place.txt','r') as place:
     num = int(place.read())
 
-round = 400             #number of download rounds per program run
-set = 100               #number of download atempts per round
-
+round = 10000               #number of download rounds per program run
+set = 100                   #number of download atempts per round
+retry = 0                   #don't fail twice
 timer = time.time()
 sleep_time = 10
 
@@ -48,8 +48,8 @@ for i in range(0, round):
                 pics = soup.find(property="og:image")
                 if pics == None:
                     continue
-                pics_name = pics["content"].split('/')[-1]
                 res = requests.get(pics["content"], stream = True, timeout = 60)
+                pics_name = pics["content"].split('/')[-1]
 
                 with open(os.path.join(path, pics_name), 'wb') as f:
                     shutil.copyfileobj(res.raw, f)
@@ -61,10 +61,17 @@ for i in range(0, round):
         except Exception as e:
             print("cannot work " + sauce)
             print(f"Exception occured: {e}")
-            print("\a")
-            num -= 1
-            time.sleep(600)
-            continue
+            for x in range(0,10):
+                print("    (*_*)    ", end="\a")
+                time.sleep(1)
+            if retry == num + j:
+                time.sleep(1800)
+                continue
+            else:
+                retry = num + j
+                num -= 1
+                time.sleep(600)
+                continue
 
     num += set
     with open('place.txt', 'w') as place:                          #save progress
