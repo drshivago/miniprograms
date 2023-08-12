@@ -3,22 +3,7 @@ from bs4 import BeautifulSoup
 import shutil
 import time
 import os
-
-def timeDivider(time, amount):
-    unit = time % amount
-    temp_time = time - unit
-    temp_time = temp_time // amount
-    return temp_time, unit
-
-def timeDecorator(time_date):
-
-    if time_date < 60:
-        return 0, 0, 0, time_date
-    time_date, seconds = timeDivider(time_date, 60)
-    time_date, minutes = timeDivider(time_date, 60)
-    days, hours = timeDivider(time_date, 24)
-
-    return days, hours, minutes, seconds
+import timedecorator
 
 link = "https://worldcosplay.net/photo/"
 home = "/Users/peterfile/miniprograms/photos/"
@@ -28,10 +13,11 @@ with open('place.txt','r') as place:
     file_num = int(place.readline())
     photo_saves = int(place.readline())
 
-round = 10000               #number of download rounds per program run
+round = 1000                #number of download rounds per program run
 set = 100                   #number of download atempts per round
 retry = 0                   #don't fail twice
-sleep_time = 10
+per_folder = 50050          #number of photos saved per folder
+sleep_time = 5
 timer = time.time()
 session = requests.Session()
 path = os.path.join(home, str(file_num))
@@ -57,9 +43,12 @@ for i in range(0, round):
                     shutil.copyfileobj(res.raw, f)
                     photo_saves += 1
                     print(" Downloading: " + sauce + ' ' + pics_name)
+                    print(sauce + ' ' + pics_name, file=open(os.path.join(path, "log.txt"), 'a'))
 
             else:
                 print("/",end="")
+                if r.status_code != 404:
+                    print(sauce, ' ', r.status_code, ' ', file=open(os.path.join(path, "log.txt"), 'a'))
 
         except Exception as e:
             print("\ncannot work " + sauce)
@@ -80,11 +69,12 @@ for i in range(0, round):
                 continue
 
     num += set
-    if photo_saves >= 50000:                                                    #if files ~50000 make new folder, use that
+    if photo_saves >= per_folder:                                               #make new folder, use that
 
         file_num += 1
         path = os.path.join(home, str(file_num))
         os.mkdir(path)
+        print("Download Log:", file=open(os.path.join(path, "log.txt"), 'w+'))
         print("Making new folder")
         photo_saves = 0
 
@@ -98,7 +88,5 @@ for i in range(0, round):
     time.sleep(sleep_time)
 
 print("time to pop champain!")                                                  #some how finised without error
-time_elaps = timeDecorator(int(time.time() - timer))
-print("Time elapsed: ", time_elaps[0], " days ", time_elaps[1], " hours ",\
-time_elaps[2], " minutes ", time_elaps[3], " seconds")
+print(timedecorator.time(int(time.time() - timer)))
 print("\a")
